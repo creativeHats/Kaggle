@@ -14,7 +14,7 @@ rm(list=ls())
 setwd("/home/gse/bimbo")
 
 client <- read.csv("cliente_tabla.csv")
-product <- read_csv("product.csv")
+product <- read.csv("product.csv")
 town <- read.csv("town_state.csv")
 test <- read.csv("test.csv")
 
@@ -97,12 +97,12 @@ watchlist<-list(dval=dval)
 clf <- xgb.train(params=list(  objective="reg:linear", 
                                booster = "gbtree",
                                eta=0.1, 
-                               max_depth=10, 
+                               max_depth=20, 
                                subsample=0.85,
                                colsample_bytree=0.7) ,
                  data = xgb.DMatrix(data=data.matrix(data_train[-wltst,features,with=FALSE]),
                                     label=data.matrix(data_train[-wltst,target]),missing=NA), 
-                 nrounds = 75, 
+                 nrounds = 120, 
                  verbose = 1,
                  print_every_n=5,
                  early_stopping_rounds    = 10,
@@ -110,6 +110,9 @@ clf <- xgb.train(params=list(  objective="reg:linear",
                  maximize            = FALSE,
                  eval_metric='rmse'
 )
+t1<-clf$trees[[1]]
+library(tree)
+plot(t1)
 
 # Make prediction for the 10th week
 data_test1=data_test[Semana==10,]
