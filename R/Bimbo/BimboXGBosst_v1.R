@@ -24,18 +24,7 @@ product = as.data.table(product)
 train=fread('train.csv',select = c("Semana",'Cliente_ID', 'Producto_ID', 'Agencia_ID', 'Ruta_SAK', 'Demanda_uni_equil'))
 test=fread('test.csv',select = c("Semana",'id','Cliente_ID', 'Producto_ID', 'Agencia_ID', 'Ruta_SAK'))
 
-==============================================================================
 
-train = as.data.table(train)
-
-setkey(train, Producto_ID)
-setkey(product, Producto_ID)
-
-train_product <- sqldf("select * from train t INNER JOIN product p on t.Producto_ID =  p.Producto_ID")
-
-train<- read.csv.ffdf(file="train.csv", header=TRUE, VERBOSE=TRUE, first.rows=10000000, next.rows=1000000, colClasses=NA)
-
-==============================================================================
 
 train$id=0
 train[,target:=Demanda_uni_equil]
@@ -102,7 +91,7 @@ clf <- xgb.train(params=list(  objective="reg:linear",
                                colsample_bytree=0.7) ,
                  data = xgb.DMatrix(data=data.matrix(data_train[-wltst,features,with=FALSE]),
                                     label=data.matrix(data_train[-wltst,target]),missing=NA), 
-                 nrounds = 120, 
+                 nrounds = 150, 
                  verbose = 1,
                  print_every_n=5,
                  early_stopping_rounds    = 10,
@@ -110,9 +99,7 @@ clf <- xgb.train(params=list(  objective="reg:linear",
                  maximize            = FALSE,
                  eval_metric='rmse'
 )
-t1<-clf$trees[[1]]
-library(tree)
-plot(t1)
+xgb.plot.tree(feature_names=names, model=bst)
 
 # Make prediction for the 10th week
 data_test1=data_test[Semana==10,]
